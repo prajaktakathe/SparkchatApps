@@ -1,0 +1,121 @@
+<div>
+  <div class="bg-light lter b-b wrapper-md sc-page-header">
+    <div class="row" >
+      <div class="col-lg-12">
+        <div class="row">
+          <div class="col-sm-3" >
+            <h1 class="m-n font-thin h3 text-black sc-todo-title">Manage Tasks</h1>
+          </div>
+          <div class="col-sm-9">
+              <div class="sc-todo-filter">
+              <span class="sc-sort-by">Sort By</span>
+              <select name="order" class="form-control m-r" ng-model="taskOrder" ng-selected="orderFilter" ng-options="item for item in orderList" ng-change="updateOrder()" style="width:105px;"></select>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="wrapper-md">
+    <div class="col-md-10 col-md-offset-1 sc-page-wrapper m-b sc-todo-top-wrapper" >
+      <form class="sc-todo-wrapper">
+        <div class="input-group">
+          <input type="text" autofocus="true" class="form-control sc-todo-input" id="inputField" placeholder="Add New Task..." ng-model="titleInput" autocomplete="off" custom-enter="createTask()">
+          <span class="input-group-addon sc-create-task" role="button" tabindex="0" ng-click="createTask()">
+            Add
+          </span>
+        </div>
+      </form>
+
+      <ul class="nav nav-xs nav-pills m-t m-b" ng-show="taskList.length">
+          <li >
+            <a ng-click="showAll()" ng-class="{'btn-info': all}">All</a>
+          </li>
+          <li >
+            <a ng-click="showActive()" ng-class="{'btn-info': active}">Active</a>
+          </li>
+          <li>
+            <a ng-click="showComplete()" ng-class="{'btn-info': complete}">Completed</a>
+          </li>
+      </ul>
+      <ul class="list-group list-group-lg m-b-none sc-todo-wrapper" >
+        <li class="list-group-item" ng-class="{'sc-last-todo-item':$last}" ng-repeat="task in taskList | filter:statusFilter | orderBy: orderType" ng-click="openEditModal($event,task.task_id,task.isCompleted)"  ng-if="task.startTimeStamp != 0" ng-show="all">
+          <div class="row">
+            <div class="col-sm-10 col-xs-10 title-container todo-parent clstitle" style="overflow:hidden;">
+              <div class="pull-left clscheckbx">
+                <label class="i-checks" title="Click to change Task Status" data-toggle="tooltip"  ng-init="parseId(task)">
+                  <input type="checkbox" ng-model="task.isCompleted" ng-change="updateTaskStatus(task.isCompleted,task.task_id)" ng-true-value="1" ng-false-value="0">
+                  <i class="i-status"></i>
+                </label>
+              </div>
+              <div class="pull-left m-l-sm sc-todo-title-ellipsis todo-parent">
+                <span class="clear todo-parent">
+                  <span class="text-ellipsis todo-parent">{{task.title}}</span><br>
+                  <small class="clear todo-parent" ng-if="task.endTimeStamp != 9999999999">Due Date : {{task.endTimeStamp*1000 | date:"dd-MM-yyyy 'at' h:mm a"}}</small>
+                </span>
+              </div>
+            </div>
+            <div class="col-sm-2 col-xs-2 todo-parent" >
+              <span class="pull-right" title="Click to change Priority" data-toggle="tooltip" ng-click="toggleImportant(task.isImportant,task.task_id)">
+                <i class="glyphicon {{addStarClass(task.isImportant)}}" style="font-size: 2.1em;"></i>
+              </span>
+            </div>
+          </div>
+        </li>
+          <!-- for active -->
+        <li class="list-group-item" ng-class="{'sc-last-todo-item':$last}" ng-repeat="task in taskList | filter:statusFilter | orderBy: orderType" ng-click="openEditModal($event,task.task_id,task.isCompleted)"  ng-if="task.startTimeStamp != 0 && task.isCompleted != 1" ng-show="active">
+          <div class="row">
+            <div class="col-sm-10 col-xs-10 title-container todo-parent clstitle" style="overflow:hidden;">
+              <div class="pull-left clscheckbx">
+                <label class="i-checks" title="Click to change Task Status" data-toggle="tooltip"  ng-init="parseId(task)">
+                  <input type="checkbox" ng-model="task.isCompleted" ng-change="updateTaskStatus(task.isCompleted,task.task_id)" ng-true-value="1" ng-false-value="0">
+                  <i class="i-status"></i>
+                </label>
+              </div>
+              <div class="pull-left m-l-sm sc-todo-title-ellipsis todo-parent">
+                <span class="clear todo-parent">
+                  <span class="text-ellipsis todo-parent">{{task.title}}</span>
+                  <small class="clear todo-parent" ng-if="task.endTimeStamp != 9999999999">Due Date : {{task.endTimeStamp*1000 | date:"dd-MM-yyyy 'at' h:mm a"}}</small>
+                </span>
+              </div>
+            </div>
+            <div class="col-sm-2 col-xs-2 todo-parent" >
+              <span class="pull-right" title="Click to change Priority" data-toggle="tooltip" ng-click="toggleImportant(task.isImportant,task.task_id)">
+                <i class="glyphicon {{addStarClass(task.isImportant)}}" style="font-size: 2.1em;"></i>
+              </span>
+            </div>
+          </div>
+        </li>
+        <!-- for complete -->
+        <li class="list-group-item" ng-class="{'sc-last-todo-item':$last}" ng-repeat="task in taskList | filter:statusFilter | orderBy: orderType" ng-click="openEditModal($event,task.task_id,task.isCompleted)"  ng-if="task.startTimeStamp != 0 && task.isCompleted == 1" ng-show="complete">
+          <div class="row">
+            <div class="col-sm-10 col-xs-10 title-container todo-parent clstitle" style="overflow:hidden;">
+              <div class="pull-left clscheckbx">
+                <label class="i-checks" title="Click to change Task Status" data-toggle="tooltip"  ng-init="parseId(task)">
+                  <input type="checkbox" ng-model="task.isCompleted" ng-change="updateTaskStatus(task.isCompleted,task.task_id)" ng-true-value="1" ng-false-value="0">
+                  <i class="i-status"></i>
+                </label>
+              </div>
+              <div class="pull-left m-l-sm sc-todo-title-ellipsis todo-parent">
+                <span class="clear todo-parent">
+                  <span class="text-ellipsis todo-parent">{{task.title}}</span>
+                  <small class="clear todo-parent" ng-if="task.endTimeStamp != 9999999999">Due Date : {{task.endTimeStamp*1000 | date:"dd-MM-yyyy 'at' h:mm a"}}</small>
+                </span>
+              </div>
+            </div>
+            <div class="col-sm-2 col-xs-2 todo-parent" >
+              <span class="pull-right" title="Click to change Priority" data-toggle="tooltip" ng-click="toggleImportant(task.isImportant,task.task_id)">
+                <i class="glyphicon {{addStarClass(task.isImportant)}}" style="font-size: 2.1em;"></i>
+              </span>
+            </div>
+          </div>
+        </li>
+      </ul>
+    <div>
+    <script type="text/ng-template" id="toDoContent.html">
+      <div ng-include="'partials/create-todo-modal.html'"></div>
+    </script>
+    </div>
+  </div>
+  </div>
+</div>

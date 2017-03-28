@@ -1,0 +1,141 @@
+<div class="modal-body">
+
+	<div class="panel-body">
+      	<form class="form-horizontal ng-valid ng-valid-date ng-valid-required ng-valid-date-disabled ng-dirty ng-valid-parse" method="get" style="">
+        	<div class="text-danger wrapper text-center" ng-show="showError">
+          		{{showError}}
+           </div>
+        	<div class="form-group">
+	          	<label class="col-sm-2 control-label">Title</label>
+	          	<div class="col-sm-10">
+	            	<input type="text" name="title" class="form-control" ng-model="input.title" maxlength="60" placeholder="Enter Title...">
+	          	</div>
+        	</div>
+        	<div class="form-group">
+          		<label class="col-sm-2 control-label">Description</label>
+          		<div class="col-sm-10">
+            		<input type="text" name="description" class="form-control" ng-model="input.description" maxlength="120" placeholder="Enter Description...">
+          		</div>
+        	</div>
+        	<!-- UI for Due date -->
+        	<!-- <div class="form-group">
+          		<label class="col-sm-2 control-label sc-date-picker-label" style="padding-top:37px;">Start Date</label>
+          		<div class="col-sm-6 sc-date-picker-input" style="padding-top:32px;">
+           			<div class="input-group w-md">
+              			<input type="text" class="form-control" min-date="mindate" datepicker-popup="{{format}}" ng-model="formData.dt" is-open="datepickers.dt" datepicker-options="dateOptions" ng-required="true" close-text="Close" readonly/>
+              			<span class="input-group-btn">
+                			<button type="button" class="btn btn-default" ng-click="open($event,'dt')"><i class="glyphicon glyphicon-calendar"></i></button>
+              			</span>
+            		</div>
+          		</div>
+          		<div class="col-sm-4">
+          			<timepicker ng-model="firstTime" ng-change="changedFirstTime(firstTime)" hour-step="hstep" minute-step="mstep" show-meridian="ismeridian"></timepicker>
+          		</div>
+        	</div> -->
+
+        	<div class="form-group">
+          		<label class="col-sm-2 control-label sc-date-picker-label" style="padding-top:37px;">Due Date</label>
+          		<div class="col-sm-6 sc-date-picker-input" style="padding-top:32px;">
+           			<div class="input-group w-md">
+              			<input type="text" class="form-control" min-date="mindate" datepicker-popup="{{format}}" ng-model="formData.dtSecond" is-open="datepickers.dtSecond" datepicker-options="dateOptions" ng-required="true" close-text="Close" readonly/>
+              			<span class="input-group-btn">
+                			<button type="button" class="btn btn-default" ng-click="open($event,'dtSecond')"><i class="glyphicon glyphicon-calendar"></i></button>
+              			</span>
+            		</div>
+          		</div>
+          		<div class="col-sm-4">
+          			<timepicker ng-model="secondTime" ng-change="changedSecondTime(secondTime)" hour-step="hstep" minute-step="mstep" show-meridian="ismeridian"></timepicker>
+          		</div>
+        	</div>
+
+
+
+        	<!-- UI for priority -->
+        	<!-- <div class="form-group">
+          		<label class="col-sm-2 control-label">Priority</label>
+          		<div class="col-sm-10">
+            		<label class="checkbox-inline i-checks">
+              			<input type="radio" name="a" value='1' ng-model="priority.option">
+              			<i></i> Low
+            		</label>
+            		<label class="checkbox-inline i-checks">
+             			<input type="radio" name="a" value='2' ng-model="priority.option" >
+             			<i></i> Medium
+            		</label>
+            		<label class="checkbox-inline i-checks">
+              			<input type="radio" name="a" value='3' ng-model="priority.option">
+              			<i></i> High
+            		</label>
+          		</div>
+        	</div> -->
+
+          <div class="form-group subtask-contaniner" ng-repeat="subTask in subTasks">
+            <label class="i-checks col-sm-2 col-xs-2 control-label" style="padding-top:0px;" title="Click to change SubTask Status" data-toggle="tooltip" ng-init="parseId(subTask)">
+              <input type="checkbox" ng-model="subTask.subtaskStatus" ng-change="updateSubTaskStatus(subTask.subtaskStatus,subTask.subtaskId)" ng-true-value="1" ng-false-value="0">
+              <i></i>
+            </label>
+            <div class="col-sm-10 col-xs-10">
+              <div class="col-sm-9 col-xs-9" contenteditable ng-model="subTask.subtaskTitle" ng-focus="whenFocus(subTask.subtaskTitle)" ng-blur="whenLoseFocus(subTask.subtaskTitle,subTask.subtaskId)" ng-keydown="disableEnter($event)">
+
+              </div>
+              <div class="col-sm-3 col-xs-3">
+
+                <div class="col-sm-6 col-xs-6">
+                  <span class="pull-right" ng-click="toggleSubImportant(subTask.subtaskPriority,subTask.subtaskId)" title="Click to change SubTask Priority" data-toggle="tooltip">
+                  <i class="glyphicon {{addSubTaskStarClass(subTask.subtaskPriority)}}" style="font-size: 1.3em;"></i>
+                </span>
+                </div>
+
+                <div class="col-sm-6 col-xs-6">
+                  <img class="pull-right" src="img/ic_close_1x.png" width="20px" height="20px" style="cursor:pointer" title="Click to delete SubTask" data-toggle="tooltip" ng-click="removeSubTask(subTask.subtaskId)">
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+              <label class="col-sm-2 control-label">Sub Tasks</label>
+              <div class="col-sm-10">
+                <!-- <input type="text" name="description" class="form-control" ng-model="input.subTask" maxlength="120" placeholder="Add Sub Task..." custom-enter="addSubTask()"> -->
+								<div class="input-group">
+				         <input type="text" name="description" class="form-control" ng-model="input.subTask" maxlength="120" placeholder="Add Sub Task..." custom-enter="addSubTask()">
+				          <span class="input-group-addon sc-create-task" role="button" tabindex="0" ng-click="addSubTask()">
+				            Add
+				          </span>
+				        </div>
+              </div>
+          </div>
+
+
+          <!-- UI for Reminder -->
+            <div class="form-group m-b-xl" >
+                <label class="col-sm-2 control-label">Reminder</label>
+                <div class="col-sm-10">
+                  <select name="order" class="form-control m-r w-md" ng-model="selectedReminder" ng-options="item for item in reminderOptionList" ng-change="updateReminder(selectedReminder)"></select>
+                </div>
+            </div>
+
+						<div class="form-group m-b-xl" >
+                <label class="col-sm-2 control-label">Assign To</label>
+                <div class="col-sm-10">
+									<tags-input ng-model="tags" key-property="id" display-property="name" add-on-paste="true" add-from-autocomplete-only="true" on-tag-removed="tagRemoved($tag)">
+										 <auto-complete min-length="1" source="loadTags($query)"></auto-complete>
+									 </tags-input>
+                </div>
+            </div>
+      	</form>
+    </div>
+
+</div>
+<div class="modal-footer">
+    <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+    <button class="btn text-white" id="saveButton" ng-style="primaryStyle" ng-click="saveTask()"
+    ng-mouseleave="changeColorOnHover('saveButton',false)" ng-mouseover="changeColorOnHover('saveButton',true)">Save</button>
+    <button class="btn text-white"  id="deleteButton" ng-style="primaryStyle" ng-click="deleteTask()" ng-mouseleave="changeColorOnHover('deleteButton',false)" ng-mouseover="changeColorOnHover('deleteButton',true)">Delete</button>
+</div>
+
+<!-- Error Modal layout -->
+<script type="text/ng-template" id="errorModalContent.html">
+  <div ng-include="'tpl/error_modal.html'"></div>
+</script>
