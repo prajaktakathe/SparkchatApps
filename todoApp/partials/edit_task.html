@@ -99,7 +99,7 @@
               <div class="col-sm-10">
                 <!-- <input type="text" name="description" class="form-control" ng-model="input.subTask" maxlength="120" placeholder="Add Sub Task..." custom-enter="addSubTask()"> -->
 								<div class="input-group">
-				         <input type="text" name="description" class="form-control" ng-model="input.subTask" maxlength="120" placeholder="Add Sub Task..." custom-enter="addSubTask()">
+				         <input type="text" name="description" class="form-control" ng-model="input.subTask" maxlength="120" placeholder="Add Sub Task..." custom-enter="addSubTask()" ng-trim="false" restrict-field="input.subTask">
 				          <span class="input-group-addon sc-create-task" role="button" tabindex="0" ng-click="addSubTask()">
 				            Add
 				          </span>
@@ -137,5 +137,5 @@
 
 <!-- Error Modal layout -->
 <script type="text/ng-template" id="errorModalContent.html">
-  <div ng-include="'tpl/error_modal.html'"></div>
+  <div ng-include="'partials/error_modal.html'"></div>
 </script>

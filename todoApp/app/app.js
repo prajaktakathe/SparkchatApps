@@ -63,10 +63,15 @@ app.controller('tasksController', function($scope, $http,$state,$location,$modal
   $scope.sorter = "null";
   $scope.sortDescending = false;
   var user = $location.search();
+  $scope.edit = user.edit;
   $scope.userId = user.uId;
   $scope.resource = user.token;
   $scope.teamId = user.teamId;
   $scope.teamDomain = user.teamDomain;
+
+if($scope.edit){
+  $state.go('edit',{id: user.taskId,uId: $scope.userId,token: $scope.resource,teamId: $scope.teamId,teamDomain: $scope.teamDomain});
+}
 //  console.log(user);
 //  console.log($scope.resource);
 //  console.log($scope.teamId);
@@ -111,13 +116,14 @@ app.controller('tasksController', function($scope, $http,$state,$location,$modal
   		    	team : $scope.teamDomain,
             uId : $scope.userId
   		    });
+    //  console.log(requestParam);
        var test=$.ajax({
          "url": "ajax/getTask.php",
          "method": "GET",
          "data": requestParam,
          "success":function success(data) {
            $scope.taskList = JSON.parse(data);
-          // console.log($scope.taskList);
+          console.log($scope.taskList);
            $scope.$apply();
          	if ($scope.taskList == null) {
          		$scope.taskList = [];
@@ -166,16 +172,19 @@ app.controller('tasksController', function($scope, $http,$state,$location,$modal
       var requestParam = $.param({
               task_id:item,
               status : status,
-              team : $scope.teamDomain
+              team : $scope.teamDomain,
+              teamId:$scope.teamId,
+              title:$scope.titleInput,
+              uId:$scope.userId
             });
       var test=$.ajax({
         "url": "ajax/updateTask.php",
         "method": "GET",
         "data": requestParam,
         "success":function success(data) {
-        //  console.log(data);
+          console.log(data);
            $scope.$apply();
-           getTask();
+           //getTask();
         }
       });
   };
@@ -184,7 +193,10 @@ app.controller('tasksController', function($scope, $http,$state,$location,$modal
     var requestParam = $.param({
             task_id:taskId,
             priority : isImportant,
-            team : $scope.teamDomain
+            team : $scope.teamDomain,
+            teamId:$scope.teamId,
+            title:$scope.titleInput,
+            uId:$scope.userId
           });
     var test=$.ajax({
       "url": "ajax/updateTask.php",
@@ -432,12 +444,18 @@ app.controller('EditTaskController', ['$rootScope','$scope', '$location', '$http
          });
          $scope.addSubTask = function () {
            console.log("hello");
-          console.log($scope.input.subTask);
-        		if (typeof $scope.input.subTask != "undefined" && $scope.input.subTask != " ") {
+        //  console.log($scope.input.subTask);
+        		if (typeof $scope.input.subTask != "undefined" && $scope.input.subTask != "") {
+              console.log($scope.input.subTask);
             $scope.id= generateUid()+"-"+getCurrentTimeStamp();
+            var tags = JSON.parse(angular.toJson($scope.tags));
             var requestParam = $.param({
                     team:$scope.teamDomain,
+                    teamId:$scope.teamId,
                     taskId:taskId,
+                    assignTo:tags,
+                    title:$scope.input.title,
+                    uId:$scope.userId,
                     subtaskId:$scope.id,
           		    	subtaskTitle : $scope.input.subTask,
                     subtaskStatus : 0,
@@ -510,8 +528,9 @@ app.controller('EditTaskController', ['$rootScope','$scope', '$location', '$http
 
 
 
-    $scope.updateReminder = function () {
-    	switch($scope.selectedReminder) {
+    $scope.updateReminder = function (selectedReminder) {
+    	console.log("selectedReminder : "+$scope.selectedReminder);
+    	switch(selectedReminder) {
     		case $scope.reminderOptionList[0]:
     			//$scope.se = 'None';
     			$scope.reminderHour = "0";
@@ -523,12 +542,20 @@ app.controller('EditTaskController', ['$rootScope','$scope', '$location', '$http
     				$scope.showErrorModal("Unable to set reminder as due date is less then current time ");
     				$scope.selectedReminder = $scope.reminderOptionList[0];
 	    		}
+	    		if (typeof $scope.fullDueDate == "undefined") {
+	    			$scope.showErrorModal("Unable to set reminder as due date is not set ");
+    				$scope.selectedReminder = $scope.reminderOptionList[0];
+	    		}
     			break;
     		case $scope.reminderOptionList[2]:
     			//$scope.reminderOption = 'Before 2 hours';
     			$scope.reminderHour = "2";
     			if ($scope.fullDueDate - 3600 * 2 < getCurrentTimeStamp()) {
     				$scope.showErrorModal("Unable to set reminder as due date is less then current time ");
+    				$scope.selectedReminder = $scope.reminderOptionList[0];
+	    		}
+	    		if (typeof $scope.fullDueDate == "undefined") {
+	    			$scope.showErrorModal("Unable to set reminder as due date is not set ");
     				$scope.selectedReminder = $scope.reminderOptionList[0];
 	    		}
     			break;
@@ -539,9 +566,26 @@ app.controller('EditTaskController', ['$rootScope','$scope', '$location', '$http
     				$scope.showErrorModal("Unable to set reminder as due date is less then current time ");
     				$scope.selectedReminder = $scope.reminderOptionList[0];
 	    		}
+	    		if (typeof $scope.fullDueDate == "undefined") {
+	    			$scope.showErrorModal("Unable to set reminder as due date is not set ");
+    				$scope.selectedReminder = $scope.reminderOptionList[0];
+	    		}
     			break;
     	}
-
+    }
+    $scope.showErrorModal = function (errorMessage) {
+    	var modalInstance = $modal.open({
+    		templateUrl: 'errorModalContent.html',
+    		controller: 'ErrorModalInstanceCtrl',
+    		size: $scope.modalSize,
+    		resolve: {
+      			data: function () {
+        				return {
+        					error_message: errorMessage
+      					};
+    			}
+			}
+    	});
     }
 
     $scope.changedFirstTime = function(value) {
@@ -592,11 +636,13 @@ app.controller('EditTaskController', ['$rootScope','$scope', '$location', '$http
                 var requestParam = $.param({
                         team:$scope.teamDomain,
                         taskId:taskId,
+                        teamId : $scope.teamId,
                         title:$scope.input.title,
                         description:$scope.input.description,
                         endTimeStamp:Math.floor(endTimeStamp/1000),
                         reminder:parseInt($scope.reminderHour),
                         assignTo:tags,
+                        uId:$scope.userId,
                         subTasks:subTasks,
                         lastModified:currentTime
                       });
@@ -685,25 +731,30 @@ app.controller('EditTaskController', ['$rootScope','$scope', '$location', '$http
     	}
 
       $scope.updateSubTaskStatus = function(status,item) {
+      var tags = JSON.parse(angular.toJson($scope.tags));
        console.log("status : "+status);
           var requestParam = $.param({
                   subtask_id:item,
                   status : status,
                   team : $scope.teamDomain,
                   taskId:taskId,
+                  teamId:$scope.teamId,
+                  title:$scope.input.title,
+                  uId:$scope.userId,
+                  assignTo:tags
                 });
           var test=$.ajax({
             "url": "ajax/updateSubTask.php",
             "method": "GET",
             "data": requestParam,
             "success":function success(data) {
-            //  console.log(data);
+             console.log(data);
                getSingleTask();
             }
           });
       };
-
       $scope.toggleSubImportant = function (isImportant, subTask){
+        var tags = JSON.parse(angular.toJson($scope.tags));
         console.log("priority : "+isImportant);
         console.log("priority : "+subTask);
           if(isImportant=='1'){isImportant='0';}else{isImportant='1';}
@@ -712,13 +763,17 @@ app.controller('EditTaskController', ['$rootScope','$scope', '$location', '$http
                   priority : isImportant,
                   team : $scope.teamDomain,
                   subtask_id:subTask,
+                  teamId:$scope.teamId,
+                  title:$scope.input.title,
+                  uId:$scope.userId,
+                  assignTo:tags
                 });
           var test=$.ajax({
             "url": "ajax/updateSubTask.php",
             "method": "GET",
             "data": requestParam,
             "success":function success(data) {
-            //  console.log(data);
+            console.log(data);
                $scope.$apply();
                getSingleTask();
             }
@@ -738,6 +793,16 @@ app.controller('EditTaskController', ['$rootScope','$scope', '$location', '$http
     		}
     		return true;
     	}
+}]);
+app.controller('ErrorModalInstanceCtrl', ['$rootScope', '$scope', '$state', '$modalInstance', 'data', function($rootScope, $scope, $state, $modalInstance, data) {
+	//console.log("inside ErrorModalInstanceCtrl : ");
+	$scope.errorTitle = "Error"
+	$scope.errorBody = data.error_message;
+	$scope.ok = function () {
+	  	$modalInstance.dismiss('cancel');
+
+	};
+
 }]);
 app.directive("contenteditable", function() {
   	return {
@@ -776,3 +841,22 @@ app.directive('customEnter', function () {
         });
     };
 });
+app.directive('restrictField', function () {
+    return {
+        restrict: 'AE',
+        scope: {
+            restrictField: '='
+        },
+        link: function (scope) {
+          // this will match spaces, tabs, line feeds etc
+          // you can change this regex as you want
+          var regex = /\s/g;
+
+          scope.$watch('restrictField', function (newValue, oldValue) {
+              if (newValue != oldValue && regex.test(newValue)) {
+                scope.restrictField = newValue.replace(regex, '');
+              }
+          });
+        }
+    };
+  });
